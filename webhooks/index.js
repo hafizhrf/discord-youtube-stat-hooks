@@ -4,7 +4,7 @@ import bodyParser from 'body-parser'
 
 // Lib
 import { embedResponse } from './lib/responseJson'
-import { fetchChannel } from './lib/getChannelData'
+import { fetchChannel, fetchCountry } from './lib/getChannelData'
 
 // App
 const app = express()
@@ -14,13 +14,35 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-  let channels = []
+  const {
+    key, discordHooks,
+    channelIds,
 
-  if (req.query.key && req.query.key == 'wajibwibu') {
-    let listChannel = fetchChannel(req.query.channelIds)
-    channels.push(listChannel)
+    countries, status, date
+  } = req.query
 
-    embedResponse(channels, req.query.discordHooks, res)
+  let listChannels = []
+  let listCountries = []
+
+  if (key) {
+    switch (key) {
+      case 'wajibwibu':
+        let getChannel = fetchChannel(channelIds)
+        listChannels.push(getChannel)
+
+        embedResponse(listChannels, discordHooks, res, key)
+        break;
+      case 'covid':
+        if (!date) {
+          let getCountry = fetchCountry(countries, status, null)
+          listCountries.push(getCountry)
+        } else{
+          let getCountry = fetchCountry(countries, status, date)
+          listCountries.push(getCountry)
+        }
+
+        embedResponse(listCountries, discordHooks, res, key)
+    }
   } else {
     let payload = {
       success: false, status: 400,

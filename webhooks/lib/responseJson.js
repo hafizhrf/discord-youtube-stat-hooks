@@ -1,36 +1,19 @@
 import axios from 'axios'
-import { formatNumber } from './formatting'
 
-function responseJson(val) {
-  const { snippet, statistics } = val.data.items[0]
+import { Covid, YouTubeStats } from './responses'
 
-  return {
-    "author": {
-      "name": snippet.title,
-      "icon_url": snippet.thumbnails.default.url
-    },
-    "fields": [
-      {
-        "name": "Subscribers",
-        "value": formatNumber(statistics.subscriberCount),
-        "inline": true
-      },
-      {
-        "name": "Viewers in Total",
-        "value": formatNumber(statistics.viewCount),
-        "inline": true
-      },
-      {
-        "name": "Videos in Total",
-        "value": formatNumber(statistics.videoCount),
-        "inline": false
-      }
-    ],
-    "color": 3122943
+function responseJson(val, key) {
+  switch (key) {
+    case 'wajibwibu':
+      return YouTubeStats(val)
+    case 'covid':
+      return Covid(val)
+    default:
+      return YouTubeStats(val)
   }
 }
 
-const embedResponse = (channels, discordHooks, res) => {
+const embedResponse = (listData, discordHooks, res, key) => {
   let embeds = []
   let payload = {
     success: false,
@@ -39,8 +22,8 @@ const embedResponse = (channels, discordHooks, res) => {
     error: null
   }
 
-  return Promise.all(channels).then(async (values) => {
-    values.map((val) => { embeds.push(responseJson(val)) })
+  return Promise.all(listData).then(async (values) => {
+    values.map((val) => { embeds.push(responseJson(val, key)) })
 
     try {
       let result = await axios.post(discordHooks, { embeds }, {
@@ -55,10 +38,10 @@ const embedResponse = (channels, discordHooks, res) => {
         payload.status = 400
         payload.message = 'Failed Get Data'
       }
-      
+
       res.send(payload)
-      
-    } catch(e) {
+
+    } catch (e) {
       throw e
     }
   }).catch((e) => {
