@@ -1,4 +1,4 @@
-.now
 node_modules
 config.json
+now.json
 package-lock.json
