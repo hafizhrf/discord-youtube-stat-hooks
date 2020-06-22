@@ -32,6 +32,9 @@ app.get('/', (req, res) => {
 
         embedResponse(listChannels, discordHooks, res, key)
         break;
+      case 'mabar':
+        embedResponse([''], discordHooks, res, key)
+        break;
       case 'covid':
         if (!date) {
           let getCountry = fetchCountry(countries, status, null)
